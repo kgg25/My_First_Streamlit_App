@@ -15,5 +15,10 @@ def train_nb_model():
     NB_model = GaussianNB()
     NB_model.fit(X_train, Y_train)
     Y_pred = NB_model.predict(X_test)
+    
     score = metrics.accuracy_score(Y_test, Y_pred)
-    return (NB_model, score)
+    report = metrics.classification_report(Y_test, Y_pred)
+    conf_matrix = metrics.confusion_matrix(Y_test, Y_pred)
+    
+    score = metrics.accuracy_score(Y_test, Y_pred)
+    return (NB_model, score, report, conf_matrix)

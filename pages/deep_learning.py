@@ -1,44 +1,28 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
+import plotly.express as px
 
 
-# 2. horizontal menu
-selected2 = option_menu(None, ["Home", "Upload", "Tasks", 'Settings'], 
-    icons=['house', 'cloud-upload', "list-task", 'gear'], 
-    menu_icon="cast", default_index=0, orientation="horizontal")
-selected2
+st.set_page_config(page_title="Deep Learning",
+                   layout="wide",
+                   page_icon="🧠")
 
-# 3. CSS style definitions
-selected3 = option_menu(None, ["Home", "Upload",  "Tasks", 'Settings'], 
-    icons=['house', 'cloud-upload', "list-task", 'gear'], 
-    menu_icon="cast", default_index=0, orientation="horizontal",
-    styles={
-        "container": {"padding": "0!important", "background-color": "#fafafa"},
-        "icon": {"color": "orange", "font-size": "25px"}, 
-        "nav-link": {"font-size": "25px", "text-align": "left", "margin":"0px", "--hover-color": "#eee"},
-        "nav-link-selected": {"background-color": "blue"},
-    }
-)
+st.markdown("## Deep Learning Models 🤖🎲⚙️")
 
+st.write("#### We will use two dataset for multi layer perception (MLP) for the moment : iris and boston")
+st.write("##### Once the application grow up, other datasets will be introduced")
 
-# 4. Manual Item Selection
-if st.session_state.get('switch_button', False):
-    st.session_state['menu_option'] = (st.session_state.get('menu_option',0) + 1) % 4
-    manual_select = st.session_state['menu_option']
-else:
-    manual_select = None
+# fig = px.scatter(df,
+#                 x="Sepal Width",
+#                 y="Sepal Length",
+#                 color="Sepal Length",
+#                 color_continuous_scale="reds",
+#                 )
     
-selected4 = option_menu(None, ["Home", "Upload", "Tasks", 'Settings'], 
-    icons=['house', 'cloud-upload', "list-task", 'gear'], 
-    orientation="horizontal", manual_select=manual_select, key='menu_4')
-selected4
-
-# 5. Add on_change callback
-def on_change(key):
-    selection = st.session_state[key]
-    st.write(f"Selection changed to {selection}")
+# tab1, tab2  =st.tabs(["Streamlit theme (default)", "Plotly native theme"])
     
-selected5 = option_menu(None, ["Home", "Upload", "Tasks", 'Settings'],
-                        icons=['house', 'cloud-upload', "list-task", 'gear'],
-                        on_change=on_change, key='menu_5', orientation="horizontal")
-selected5
+# with tab1:
+#     st.plotly_chart(fig, theme="streamlit", use_container_width=True)
+        
+# with tab2:
+#     st.plotly_chart(fig, theme=None, use_container_width=True)

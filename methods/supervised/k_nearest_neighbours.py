@@ -14,5 +14,9 @@ def train_knn_model():
     KNN_model = KNeighborsClassifier(n_neighbors=10)
     KNN_model.fit(X_train, Y_train)
     Y_pred = KNN_model.predict(X_test)
+    
     score = metrics.accuracy_score(Y_test, Y_pred)
-    return (KNN_model, score)
+    report = metrics.classification_report(Y_test, Y_pred)
+    conf_matrix = metrics.confusion_matrix(Y_test, Y_pred)
+    
+    return (KNN_model, score, report, conf_matrix)

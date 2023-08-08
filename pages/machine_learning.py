@@ -1,3 +1,4 @@
+# libraries importation
 import streamlit as st
 from streamlit_option_menu import option_menu
 import plotly.graph_objects as go
@@ -9,7 +10,10 @@ from methods.supervised.naive_bayes import df
 import pickle
 import plotly.graph_objects as go
 import plotly.express as px
+import pandas as pd
 
+
+#models variables 
 
 
 st.set_page_config(page_title="Machine Learning",
@@ -65,15 +69,15 @@ def on_change_unsupervised_model(key):
 
 @st.cache_data
 def nb_predict(s_length, s_width, p_length, p_width):
-    model, accuracy = train_nb_model()
+    model, accuracy, report, conf_mat = train_nb_model()
     result = model.predict([[s_length, s_width, p_length, p_width]])
-    return (result, accuracy, model)
+    return (result, accuracy, model, report, conf_mat)
 
 @st.cache_data
 def knn_predict(s_length, s_width, p_length, p_width):
-    model, accuracy = train_knn_model()
+    model, accuracy, report, conf_matrix = train_knn_model()
     result = model.predict([[s_length, s_width, p_length, p_width]])
-    return (result, accuracy, model)
+    return (result, accuracy, model, report, conf_matrix)
 
 
 def download_model(model):
@@ -108,15 +112,41 @@ if learning_model == "Supervised Learning":
     
     if supervised_model == "Naive Bayes":
             
+            
         st.latex(r"""\text{\large Chose your iris parameters}""")
         sepal_length = st.slider("Sepal length", 4.3, 7.9, 5.0, help="The length of your iris sepal")
         sepal_width = st.slider("Sepal width", 2.0, 4.4, 3.0, help="The width of your iris sepal")
         petal_length = st.slider("Petal length", 1.0, 6.9, 2.0, help="The length of your iris petal")
         petal_width = st.slider("Petal width", 0.1, 2.5, 1.7, help="The width of your iris petal")
         
-        result, nb_score, model = nb_predict(sepal_length, sepal_width, petal_length, petal_width)
+        result, nb_score, model, nb_report, nb_conf_mat = nb_predict(sepal_length, sepal_width, petal_length, petal_width)
         st.write(f"#### Your iris is a **{result[0]}** flour 🪷")
-        st.write(f"NB: this model's accuracy score is {nb_score*100:.2f}%")
+        
+        if st.checkbox("Show model infos"):
+            st.write("##### It's important to know that the model is not 💯% sure. 😬")
+            st.write("##### What are the limits of the model ?🤔")
+            
+            st.write(f"### Accuracy score: {nb_score*100:.2f}%")
+            st.write("### Classification report: ")
+            
+            report_data = []
+            lines = nb_report.split('\n')
+            for line in lines[2:-3]:
+                row = line.split()
+                report_data.append(row)
+
+            df_report = pd.DataFrame(report_data, columns=['class', 'precision', 'recall', 'f1-score', 'support'])         
+            st.write(df_report)
+            
+            st.write("### Confusion matrix: ")
+            fig_conf_mat = px.imshow(nb_conf_mat,
+                                    text_auto=True,
+                                    labels=dict(x="True", y="brwnyl"),
+                                    color_continuous_scale="amp")
+            
+            fig_conf_mat.update_layout(width=800,  height=600)
+            
+            st.plotly_chart(fig_conf_mat)
         
         st.download_button(label="Download model",
                            data=open("model", 'rb').read(),
@@ -133,10 +163,35 @@ if learning_model == "Supervised Learning":
         petal_length = st.slider("Petal length", 1.0, 6.9, 2.0, help="The length of your iris petal")
         petal_width = st.slider("Petal width", 0.1, 2.5, 1.7, help="The width of your iris petal")
 
-        result, knn_score, model = knn_predict(sepal_length, sepal_width, petal_length, petal_width)
+        result, knn_score, model, knn_report, knn_conf_matrix = knn_predict(sepal_length, sepal_width, petal_length, petal_width)
         st.write(f"#### Your iris is a **{result[0]}** flour 🪷")
-        st.write(f"NB: this model's accuracy score is {knn_score*100:.2f}%")
-    
+        
+        if st.checkbox("Show model infos"):
+            st.write("##### It's important to know that the model is not 💯% sure. 😬")
+            st.write("##### What are the limits of the model ?🤔")
+            
+            st.write(f"### Accuracy score: {knn_score*100:.2f}%")
+            st.write("### Classification report: ")
+            
+            report_data = []
+            lines = knn_report.split('\n')
+            for line in lines[2:-3]:
+                row = line.split()
+                report_data.append(row)
+
+            df_report = pd.DataFrame(report_data, columns=['class', 'precision', 'recall', 'f1-score', 'support'])         
+            st.write(df_report)
+            
+            st.write("### Confusion matrix: ")
+            fig_conf_mat = px.imshow(knn_conf_matrix,
+                                    text_auto=True,
+                                    labels=dict(x="True", y="brwnyl"),
+                                    color_continuous_scale="magenta")
+            
+            fig_conf_mat.update_layout(width=800,  height=600)
+            
+            st.plotly_chart(fig_conf_mat)
+            
         st.download_button(label="Download model",
                            data=open("model", 'rb').read(),
                            on_click=download_model(model),
@@ -166,6 +221,8 @@ else:
                x="X1",
                y="X2",
                color_continuous_scale="Viridis")
+
+    fig1.update_layout(width=800, height=600)
     
     st.plotly_chart(fig1)
     
@@ -177,17 +234,19 @@ else:
 
 # Ajouter les points de données avec les couleurs selon les étiquettes des clusters
     fig.add_trace(go.Scatter(x=data_kmeans['X1'], y=data_kmeans['X2'], mode='markers',
-                         marker=dict(size=10, color=labels, colorscale='Viridis'),
+                         marker=dict(size=10, color=labels, colorscale='Plasma'),
                          name='Points'))
 
 # Ajouter les centres des clusters en rouge
     fig.add_trace(go.Scatter(x=[c[0] for c in centres], y=[c[1] for c in centres], mode='markers',
-                             marker=dict(size=10, color='green'),
+                             marker=dict(size=10, color='red'),
                              name='Centres'))
 
 # Personnaliser le titre et les étiquettes des axes
     fig.update_layout(xaxis_title='X1',
-                      yaxis_title='X2')
+                      yaxis_title='X2',
+                      width=800, 
+                      height=600)
 
 # Afficher la figure avec st.plotly_chart()
     st.plotly_chart(fig)
