@@ -1,6 +1,7 @@
 # libraries importation
 import streamlit as st
 from streamlit_option_menu import option_menu
+from annotated_text import annotated_text, annotation
 import plotly.graph_objects as go
 from methods.supervised.naive_bayes import train_nb_model
 from methods.unsupervised.k_means import train_k_means_model
@@ -30,6 +31,7 @@ fig = px.scatter(df,
                 color="Sepal Length",
                 color_continuous_scale="reds",
                 )
+fig.update_layout(width=800, height=600)
     
 tab1, tab2  =st.tabs(["Streamlit theme (default)", "Plotly native theme"])
     
@@ -120,8 +122,15 @@ if learning_model == "Supervised Learning":
         petal_width = st.slider("Petal width", 0.1, 2.5, 1.7, help="The width of your iris petal")
         
         result, nb_score, model, nb_report, nb_conf_mat = nb_predict(sepal_length, sepal_width, petal_length, petal_width)
-        st.write(f"#### Your iris is a **{result[0]}** flour 🪷")
         
+        if result[0] == "setosa":
+            annotated_text(annotation(result[0]+"🪷", font_size = "40px",background="rgb(255, 182, 193, 0.5)" ,font_weight="bold"))
+        elif result[0] == "versicolor":
+            annotated_text(annotation(result[0]+"🥬", font_size = "40px",background="rgb(144, 238, 144, 0.5)" ,font_weight="bold"))
+        else:
+            annotated_text(annotation(result[0]+"🌻", font_size = "40px",background="rgb(255, 255, 0, 0.5)" ,font_weight="bold"))
+        
+        # annotated_text(annotation(result[0], font_size = "40px",background="rgb(144, 238, 144, 0.5)" ,font_weight="bold"))
         if st.checkbox("Show model infos"):
             st.write("##### It's important to know that the model is not 💯% sure. 😬")
             st.write("##### What are the limits of the model ?🤔")
@@ -164,7 +173,13 @@ if learning_model == "Supervised Learning":
         petal_width = st.slider("Petal width", 0.1, 2.5, 1.7, help="The width of your iris petal")
 
         result, knn_score, model, knn_report, knn_conf_matrix = knn_predict(sepal_length, sepal_width, petal_length, petal_width)
-        st.write(f"#### Your iris is a **{result[0]}** flour 🪷")
+        
+        if result[0] == "setosa":
+            annotated_text(annotation(result[0]+"🪷", font_size = "40px",background="rgb(255, 182, 193, 0.5)" ,font_weight="bold"))
+        elif result[0] == "versicolor":
+            annotated_text(annotation(result[0]+"🥬", font_size = "40px",background="rgb(144, 238, 144, 0.5)" ,font_weight="bold"))
+        else:
+            annotated_text(annotation(result[0]+"🌻", font_size = "40px",background="rgb(255, 255, 0, 0.5)" ,font_weight="bold"))
         
         if st.checkbox("Show model infos"):
             st.write("##### It's important to know that the model is not 💯% sure. 😬")
